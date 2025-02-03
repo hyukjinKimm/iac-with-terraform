@@ -19,5 +19,5 @@ resource "openstack_networking_subnet_v2" "k8s_internal_subnet" {
   cidr       = var.cidr_range            # 대역대 변수 사용
   ip_version = 4                          # IP 버전 (IPv4)
   enable_dhcp = false                    # DHCP 비활성화
-  gateway_ip  = null                     # 게이트웨이 비활성화
+  no_gateway = true
 }

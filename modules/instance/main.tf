@@ -13,15 +13,16 @@ resource "openstack_compute_instance_v2" "this" {
   flavor_id       = var.flavor_id
   key_pair        = var.key_pair
   security_groups = var.security_groups
-
+  config_drive = true
   network {
     uuid = var.network_id
   }
-
   network {
     port = var.port_id
   }
-
+  user_data = templatefile("${path.module}/user_data.tpl", {
+    hostname      = var.hostname
+  })
   timeouts {
     create = "30m"
   }
