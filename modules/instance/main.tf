@@ -20,9 +20,10 @@ resource "openstack_compute_instance_v2" "this" {
   network {
     port = var.port_id
   }
-  user_data = templatefile("${path.module}/user_data.tpl", {
-    hostname      = var.hostname
+  user_data = templatefile(var.user_data_path, {
+    hostname = var.hostname
   })
+
   timeouts {
     create = "30m"
   }

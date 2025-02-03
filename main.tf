@@ -85,8 +85,14 @@ module "controller" {
 
   hostname    = "node1.example.com"
   ip          = "192.169.10.10/16"
-}
+  user_data_path = "./scripts/master_data.tpl"
 
+  depends_on = [
+    module.worker-1,
+    module.worker-2,
+    module.storage
+  ]
+}
 module "worker-1" {
   source      = "./modules/instance"
   name        = "worker-1"
@@ -99,6 +105,7 @@ module "worker-1" {
 
   hostname    = "node2.example.com"
   ip          = "192.169.10.20/16"
+  user_data_path = "./scripts/worker_data.tpl"
 }
 module "worker-2" {
   source      = "./modules/instance"
@@ -112,6 +119,7 @@ module "worker-2" {
 
   hostname    = "node3.example.com"
   ip          = "192.169.10.30/16"
+  user_data_path = "./scripts/worker_data.tpl"
 }
 module "storage" {
   source      = "./modules/instance"
@@ -125,4 +133,5 @@ module "storage" {
 
   hostname    = "storage.example.com"
   ip          = "192.169.10.40/16"
+  user_data_path = "./scripts/worker_data.tpl"
 }

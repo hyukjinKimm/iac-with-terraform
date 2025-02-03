@@ -48,3 +48,7 @@ variable "ip" {
   type        = string
   default     = ""
 }
+variable "user_data_path" {
+  description = "Path to the user_data template file"
+  type        = string
+}
