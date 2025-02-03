@@ -39,6 +39,15 @@ module "security_group" {
 }
 
 # 포트 모듈 정의
+module "bootstrap_internal_port" {
+  source      = "./modules/port"
+  name        = "bootstrap_internal_port"
+  network_id  = module.k8s_network.network_id
+  security_group_ids = [module.security_group.security_group_id]
+  subnet_id   = module.k8s_network.subnet_id
+  ip_address  = "192.168.10.100"
+}
+
 module "controller_internal_port" {
   source      = "./modules/port"
   name        = "controller_internal_port"
@@ -73,6 +82,28 @@ module "storage_internal_port" {
   ip_address  = "192.168.10.40"
 }
 # 인스턴스 모듈 정의
+module "bootstrap" {
+  source      = "./modules/instance"
+  name        = "bootstrap"
+  image_id    = "7666e39a-b7c4-4cd1-b10b-2e3cb28fc221"
+  flavor_id   = data.openstack_compute_flavor_v2.k8s_flavor.id
+  key_pair    = "lab"
+  security_groups = [module.security_group.security_group_id]
+  network_id  = data.openstack_networking_network_v2.infra_net.id
+  port_id     = module.bootstrap_internal_port.port_id
+
+  hostname    = "bootstrap.example.com"
+  ip          = "192.169.10.100/16"
+  user_data_path = "./scripts/ansible_server_data.tpl"
+
+  depends_on = [
+    module.controller,
+    module.worker-1,
+    module.worker-2,
+    module.storage
+  ]
+}
+
 module "controller" {
   source      = "./modules/instance"
   name        = "controller"
@@ -85,13 +116,8 @@ module "controller" {
 
   hostname    = "node1.example.com"
   ip          = "192.169.10.10/16"
-  user_data_path = "./scripts/master_data.tpl"
+  user_data_path = "./scripts/ansible_worker_data.tpl"
 
-  depends_on = [
-    module.worker-1,
-    module.worker-2,
-    module.storage
-  ]
 }
 module "worker-1" {
   source      = "./modules/instance"
@@ -105,7 +131,7 @@ module "worker-1" {
 
   hostname    = "node2.example.com"
   ip          = "192.169.10.20/16"
-  user_data_path = "./scripts/worker_data.tpl"
+  user_data_path = "./scripts/ansible_worker_data.tpl"
 }
 module "worker-2" {
   source      = "./modules/instance"
@@ -119,7 +145,7 @@ module "worker-2" {
 
   hostname    = "node3.example.com"
   ip          = "192.169.10.30/16"
-  user_data_path = "./scripts/worker_data.tpl"
+  user_data_path = "./scripts/ansible_worker_data.tpl"
 }
 module "storage" {
   source      = "./modules/instance"
@@ -133,5 +159,5 @@ module "storage" {
 
   hostname    = "storage.example.com"
   ip          = "192.169.10.40/16"
-  user_data_path = "./scripts/worker_data.tpl"
+  user_data_path = "./scripts/ansible_worker_data.tpl"
 }
